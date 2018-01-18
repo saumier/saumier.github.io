@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <!-- Load c3.css -->
+    <link href="c3.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <h1> RMP Chart </h1>
+    <div id="chart"></div>
+
+    <!-- Load d3.js and c3.js -->
+    <script src="d3.min.js" charset="utf-8"></script>
+    <script src="c3.min.js"></script>
+
+    <script>
+       const testData = ["data 1", 200.0, 400.12, 100, 400, 150, 250,200,203,390]
+
+        url = "https://culture-huginn.herokuapp.com/users/1/web_requests/27/rmp.json";
+        let rmpData = [];
+        let rmpDates = [];
+        fetch(url)
+          .then((resp) => resp.json())
+          .then(function(data) {
+              rmpData.push(data.title);
+              rmpDates.push('x');
+              data.items.forEach(function(item) {
+                if (item.content != "") {
+                  rmpData.push(Number(item.content));
+                  rmpDates.push(Date.parse(item.pubDate));
+                }
+              });
+              console.log(rmpData, rmpDates);
+              var chart = c3.generate({
+                bindto: '#chart',
+                data: {
+                     x: 'x',
+                  columns: [
+                    rmpDates,
+                    rmpData
+                  ]
+                },
+                axis: {
+                    x: {
+                        type: 'timeseries',
+                        tick: {
+                            format: '%Y-%m-%d',
+                            culling: { max: 8}
+                        }
+                    }
+                }
+              });
+          })
+          .catch(function(error) {
+              console.log("Error", error);
+          });
+
+
+    </script>
+  </body>
+
+</html>
