@@ -10,7 +10,7 @@
       <div class="container">
         <h1 class="title"> RMP Chart - Personal </h1>
         <div id="msg"></div>
-        <div id="chart"></div>
+        <div id="chart"> </div>
       </div>
 
     <!-- Load d3.js and c3.js -->
@@ -30,10 +30,14 @@
           .then(function(data) {
             console.log("success",data);
             msg_display.textContent = "Refreshing data...";
+            msg_display.classList.toggle("notification")
+            msg_display.classList.toggle("is-warning")
             // callback render_chart in 1 min()
             setTimeout(function () {
                     get_chart_data();
                     msg_display.textContent = ""
+                    msg_display.classList.toggle("notification")
+                    msg_display.classList.toggle("is-warning")
                   }, 1000*30);
           })
           .catch(function(error) {
