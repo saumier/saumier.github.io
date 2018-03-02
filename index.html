@@ -2,10 +2,16 @@
   <head>
     <!-- Load c3.css -->
     <link href="c3.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
+
   </head>
   <body>
-    <h1> RMP Chart - Personal </h1>
-    <div id="chart"></div>
+    <section class="section">
+      <div class="container">
+        <h1 class="title"> RMP Chart - Personal </h1>
+        <div id="msg"></div>
+        <div id="chart"></div>
+      </div>
 
     <!-- Load d3.js and c3.js -->
     <script src="d3.min.js" charset="utf-8"></script>
@@ -14,9 +20,46 @@
     <script>
       let rmpData = [];
       let rmpDates = [];
-      url = "https://culture-huginn.herokuapp.com/users/1/web_requests/27/rmp.json";
+      const data_url = "https://culture-huginn.herokuapp.com/users/1/web_requests/27/rmp.json";
+      const trigger_update_url =  "https://culture-huginn.herokuapp.com/users/1/web_requests/50/callrbc"
+      const msg_display = document.getElementById('msg')
 
-      fetch(url)
+      function refresh_data() {
+        fetch(trigger_update_url)
+          .then((resp) => resp.json())
+          .then(function(data) {
+            console.log("success",data);
+            msg_display.textContent = "Refreshing data...";
+            // callback render_chart in 1 min()
+            setTimeout(function () {
+                    get_chart_data();
+                    msg_display.textContent = ""
+                  }, 1000*30);
+          })
+          .catch(function(error) {
+            console.log("Error", error);
+        });
+      }
+
+      function render_chart()  {
+        var chart = c3.generate({
+          bindto: '#chart',
+          data:
+            {
+              x: 'x',
+              columns: [rmpDates,rmpData]
+            },
+          axis:
+            {x: { type: 'timeseries', tick: {
+                  format: '%Y-%m-%d %Hh',
+                  count: 6
+            }}}
+          });
+      }
+
+    function get_chart_data() {
+      console.log("calling server", data_url);
+      fetch(data_url)
         .then((resp) => resp.json())
         .then(function(data) {
           rmpData.push(data.title);
@@ -28,29 +71,21 @@
             }
           });
           console.log(rmpData, rmpDates);
-          var chart = c3.generate({
-            bindto: '#chart',
-            data: {
-                 x: 'x',
-              columns: [
-                rmpDates,
-                rmpData
-              ]
-            },
-            axis: {
-              x: {
-                type: 'timeseries',
-                tick: {
-                    format: '%Y-%m-%d %Hh',
-                    culling: { max: 8}
-                }
-              }
-            }
-          });
+          render_chart()
+          let current_date = new Date()
+          let last_24_hrs = current_date.setHours(-24);
+          if (Date.parse(rmpDates.last) < last_24_hrs) {
+            refresh_data();  //refresh if date is older than a day
+          };
+
         })
         .catch(function(error) {
             console.log("Error", error);
-      });
+        });
+    }
+
+    get_chart_data()
+
     </script>
   </body>
 </html>
