@@ -86,7 +86,7 @@
                 rmpDates.push(Date.parse(item.pubDate));
               }
             });
-            console.log(rmpData, rmpDates);
+            console.log("data",rmpData, rmpDates);
             render_chart()
             let current_date = new Date()
             let freshLimit = current_date.getTime() - (24 * 60 * 60 * 1000);
