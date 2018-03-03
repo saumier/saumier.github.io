@@ -23,11 +23,11 @@
       const data_url = "https://culture-huginn.herokuapp.com/users/1/web_requests/27/rmp.json";
       const trigger_update_url =  "https://culture-huginn.herokuapp.com/users/1/web_requests/50/callrbc"
       const msg_display = document.getElementById('msg')
-      let update_trigger_called = false;
+      let refresh_trigger_called = false;
 
 
       function setup_timeout(msg) {
-        console.log("msg",msg);
+        console.log("msg ",msg);
         msg_display.textContent = msg;
         msg_display.classList.add("notification")
         msg_display.classList.add("is-warning")
@@ -42,7 +42,9 @@
 
       function refresh_data() {
         //check if a fetch is already in progress. If so then don't do another.
-        if (!update_trigger_called) {
+        if (refresh_trigger_called) {
+          setup_timeout("Waiting for update...")
+        } else {
           fetch(trigger_update_url)
             .then((resp) => resp.json())
             .then(function(data) {
@@ -51,9 +53,7 @@
             .catch(function(error) {
               console.log("Error", error);
           });
-          update_trigger_called = true;
-        } else {
-          setup_timeout("Waiting for update...")
+          refresh_trigger_called = true;
         }
       }
 
@@ -73,37 +73,37 @@
           });
       }
 
-    function get_chart_data() {
-      console.log("calling server", data_url);
-      fetch(data_url)
-        .then((resp) => resp.json())
-        .then(function(data) {
-          rmpData.push(data.title);
-          rmpDates.push('x');
-          data.items.forEach(function(item) {
-            if (item.content != "") {
-              rmpData.push(Number(item.content));
-              rmpDates.push(Date.parse(item.pubDate));
-            }
+      function get_chart_data() {
+        console.log("calling server", data_url);
+        fetch(data_url)
+          .then((resp) => resp.json())
+          .then(function(data) {
+            rmpData.push(data.title);
+            rmpDates.push('x');
+            data.items.forEach(function(item) {
+              if (item.content != "") {
+                rmpData.push(Number(item.content));
+                rmpDates.push(Date.parse(item.pubDate));
+              }
+            });
+            console.log(rmpData, rmpDates);
+            render_chart()
+            let current_date = new Date()
+            let freshLimit = current_date.getTime() - (24 * 60 * 60 * 1000);
+            console.log("freshLimit: " + new Date(freshLimit));
+
+            if (rmpDates[1] < freshLimit) {
+              console.log("Calling update trigger since last data is from " + new Date(rmpDates[1]));
+              refresh_data();  //refresh if date is older than a day
+            };
+
+          })
+          .catch(function(error) {
+              console.log("Error", error);
           });
-          console.log(rmpData, rmpDates);
-          render_chart()
-          let current_date = new Date()
-          let freshLimit = current_date.getTime() - (24 * 60 * 60 * 1000);
-          console.log("freshLimit: " + new Date(freshLimit));
+      }
 
-          if (rmpDates[1] < freshLimit) {
-            console.log("Calling update trigger since last data is from " + new Date(rmpDates[1]));
-            refresh_data();  //refresh if date is older than a day
-          };
-
-        })
-        .catch(function(error) {
-            console.log("Error", error);
-        });
-    }
-
-    get_chart_data()
+      get_chart_data()
 
     </script>
   </body>
