@@ -9,7 +9,7 @@
     <section class="section">
       <div class="container">
         <h1 class="title"> RMP Chart - Personal </h1>
-        <div id="msg"></div>
+        <div id="msg" class="notification is-warning"></div>
         <div id="chart"> </div>
       </div>
 
@@ -25,25 +25,24 @@
       const msg_display = document.getElementById('msg')
       let refresh_trigger_called = false;
 
+      function display_msg(msg) {
+        console.log("display msg ",msg);
+        msg_display.textContent = msg;
+      }
 
       function setup_timeout(msg) {
-        console.log("msg ",msg);
-        msg_display.textContent = msg;
-        msg_display.classList.add("notification")
-        msg_display.classList.add("is-warning")
+        console.log("setup_timeout ",msg);
         // callback get_chart_data in 10 sec
         setTimeout(function () {
                 get_chart_data();
-                msg_display.textContent = ""
-                msg_display.classList.remove("notification")
-                msg_display.classList.remove("is-warning")
               }, 1000*10);
       }
+
 
       function refresh_data() {
         //check if a fetch is already in progress. If so then don't do another.
         if (refresh_trigger_called) {
-          setup_timeout("Waiting for update...")
+          setup_timeout("Update in progress.  Waiting for fresh data...")
         } else {
           fetch(trigger_update_url)
             .then((resp) => resp.json())
@@ -87,6 +86,7 @@
               }
             });
             console.log("data",rmpData, rmpDates);
+
             render_chart()
             let current_date = new Date()
             let freshLimit = current_date.getTime() - (24 * 60 * 60 * 1000);
@@ -95,14 +95,18 @@
             if (rmpDates[1] < freshLimit) {
               console.log("Calling update trigger since last data is from " + new Date(rmpDates[1]));
               refresh_data();  //refresh if date is older than a day
-            };
-
+            } else {
+              display_msg(new Date(rmpDates[1]))
+            }
           })
           .catch(function(error) {
               console.log("Error", error);
+              display_msg("Error " + error);
           });
       }
 
+
+      display_msg("Contacting server...")
       get_chart_data()
 
     </script>
