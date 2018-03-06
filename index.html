@@ -33,6 +33,7 @@
       function setup_timeout(msg) {
         console.log("setup_timeout ",msg);
         // callback get_chart_data in 10 sec
+        display_msg(msg)
         setTimeout(function () {
                 get_chart_data();
               }, 1000*10);
