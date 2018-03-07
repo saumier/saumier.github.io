@@ -25,15 +25,10 @@
       const msg_display = document.getElementById('msg')
       let refresh_trigger_called = false;
 
-      function display_msg(msg) {
-        console.log("display msg ",msg);
-        msg_display.textContent = msg;
-      }
 
-      function setup_timeout(msg) {
-        console.log("setup_timeout ",msg);
+
+      function setup_timeout() {
         // callback get_chart_data in 10 sec
-        display_msg(msg)
         setTimeout(function () {
                 get_chart_data();
               }, 1000*10);
@@ -43,15 +38,17 @@
       function refresh_data() {
         //check if a fetch is already in progress. If so then don't do another.
         if (refresh_trigger_called) {
-          setup_timeout("Update in progress.  Waiting for fresh data...")
+          msg_display.textContent = "Update in progress.  Waiting for fresh data...";
+          setup_timeout()
         } else {
+          msg_display.textContent =  "Triggering an update..."
           fetch(trigger_update_url)
             .then((resp) => resp.json())
             .then(function(data) {
-              setup_timeout("Triggering an update...")
+              setup_timeout()
             })
             .catch(function(error) {
-              console.log("Error", error);
+              msg_display.textContent =  "Error: " + error
           });
           refresh_trigger_called = true;
         }
@@ -87,7 +84,6 @@
               }
             });
             console.log("data",rmpData, rmpDates);
-
             render_chart()
             let current_date = new Date()
             let freshLimit = current_date.getTime() - (24 * 60 * 60 * 1000);
@@ -97,19 +93,15 @@
               console.log("Calling update trigger since last data is from " + new Date(rmpDates[1]));
               refresh_data();  //refresh if date is older than a day
             } else {
-              display_msg(new Date(rmpDates[1]))
+              msg_display.textContent = new Date(rmpDates[1]);
             }
           })
           .catch(function(error) {
               console.log("Error", error);
-              display_msg("Error " + error);
           });
       }
-
-
-      display_msg("Contacting server...")
+      msg_display.textContent = "Contacting server..."
       get_chart_data()
-
     </script>
   </body>
 </html>
