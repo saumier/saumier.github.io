@@ -1,7 +1,7 @@
 <html>
   <head>
     <!-- Load c3.css -->
-    <link href="c3.min.css" rel="stylesheet">
+    <link href="css/c3.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css">
 
   </head>
@@ -14,94 +14,8 @@
       </div>
 
     <!-- Load d3.js and c3.js -->
-    <script src="d3.min.js" charset="utf-8"></script>
-    <script src="c3.min.js"></script>
-
-    <script>
-      let rmpData = [];
-      let rmpDates = [];
-      const data_url = "https://culture-huginn.herokuapp.com/users/1/web_requests/27/rmp.json";
-      const trigger_update_url =  "https://culture-huginn.herokuapp.com/users/1/web_requests/50/callrbc"
-      const msg_display = document.getElementById('msg')
-      let refresh_trigger_called = false;
-
-
-
-      function setup_timeout() {
-        // callback get_chart_data in 10 sec
-        setTimeout(function () {
-                get_chart_data();
-              }, 1000*10);
-      }
-
-
-      function refresh_data() {
-        //check if a fetch is already in progress. If so then don't do another.
-        if (refresh_trigger_called) {
-          msg_display.textContent = "Update in progress.  Waiting for fresh data...";
-          setup_timeout()
-        } else {
-          msg_display.textContent =  "Triggering an update..."
-          fetch(trigger_update_url)
-            .then((resp) => resp.json())
-            .then(function(data) {
-              setup_timeout()
-            })
-            .catch(function(error) {
-              msg_display.textContent =  "Error: " + error
-          });
-          refresh_trigger_called = true;
-        }
-      }
-
-      function render_chart()  {
-        var chart = c3.generate({
-          bindto: '#chart',
-          data:
-            {
-              x: 'x',
-              columns: [rmpDates,rmpData]
-            },
-          axis:
-            {x: { type: 'timeseries', tick: {
-                  format: '%Y-%m-%d %Hh',
-                  count: 6
-            }}}
-          });
-      }
-
-      function get_chart_data() {
-        console.log("calling server", data_url);
-        fetch(data_url)
-          .then((resp) => resp.json())
-          .then(function(data) {
-            rmpData.push(data.title);
-            rmpDates.push('x');
-            data.items.forEach(function(item) {
-              if (item.content != "") {
-                rmpData.push(Number(item.content));
-                rmpDates.push(Date.parse(item.pubDate));
-              }
-            });
-            console.log("data",rmpData, rmpDates);
-            render_chart()
-            let current_date = new Date()
-            let freshLimit = current_date.getTime() - (24 * 60 * 60 * 1000);
-            console.log("freshLimit: " + new Date(freshLimit));
-
-            if (rmpDates[1] < freshLimit) {
-              console.log("Calling update trigger since last data is from " + new Date(rmpDates[1]));
-              refresh_data();  //refresh if date is older than a day
-            } else {
-              msg_display.textContent = new Date(rmpDates[1]);
-            }
-          })
-          .catch(function(error) {
-              console.log("Error", error);
-          });
-      }
-      msg_display.textContent = "Contacting server..."
-      get_chart_data()
-    </script>
+    <script src="js/d3.min.js" charset="utf-8"></script>
+    <script src="js/c3.min.js"></script>
+    <script src="js/data-loader.js"></script>
   </body>
 </html>

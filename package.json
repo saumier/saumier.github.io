@@ -10,5 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "c3": "^0.4.18"
+  },
+  "devDependencies": {
+    "tape": "^4.9.0"
   }
 }
