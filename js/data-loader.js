@@ -2,7 +2,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   display_msg("Contacting server...");
-
   get_chart_data();
 });
 
@@ -17,21 +16,11 @@ function setup_timeout() {
         }, 1000*10);
 }
 
-var something = (function() {
-    var executed = false;
-    return function() {
-        if (!executed) {
-            executed = true;
-            // do something
-        }
-    };
-})();
 
-
-var refresh_data = (function () {
+let refresh_data = (function () {
   //check if a fetch is already in progress. If so then don't do another.
   //ONLY call once
-  var executed = false;
+  let executed = false;
   return function() {
     if (!executed) {
       executed = true;
